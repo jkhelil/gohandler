@@ -1,9 +1,10 @@
 package main
 
 import (
-	filters "gohandler/pkg/filters"
 	"log"
 	"net/http"
+
+	"github.com/jkhelil/gohandler/pkg/filters"
 )
 
 func main() {
