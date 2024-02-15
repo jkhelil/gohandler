@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/jkhelil/gohandler/pkg/filters"
+	filters "gohandler/pkg/filters"
 )
 
 func main() {
