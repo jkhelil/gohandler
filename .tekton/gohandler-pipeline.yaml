@@ -75,6 +75,6 @@ spec:
               export KO_DOCKER_REPO=$(params.target-registry)
               mkdir ~/.docker
               cp $(workspaces.dockerconfig.path)/.dockerconfigjson ~/.docker/config.json
-              cd $(workspaces.sources)
+              cd $(workspaces.sources.path)
               cd $(params.context)
-              ko build -t $(params.target-version) .
+              GOFLAGS="-buildvcs=false" ko build -t $(params.target-version) .

@@ -12,7 +12,8 @@ spec:
       value: 1.0.0-from-pipeline-run
   workspaces:
     - name: sources
-      emptyDir: {}
+      persistentVolumeClaim:
+        claimName: hostpvc
     - name: docker-credentials
       secret:
         secretName: push-secret
