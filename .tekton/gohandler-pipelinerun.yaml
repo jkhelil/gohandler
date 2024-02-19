@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: gohandler-pipeline-run-1
+  annotations:
+    kubernetes.io/ssh-auth: kubernetes.io/dockerconfigjson
+spec:
+  params:
+    - name: target-registry
+      value: quay.io/jkhelil
+    - name: target-version
+      value: 1.0.0-from-pipeline-run
+  workspaces:
+    - name: sources
+      emptyDir: {}
+    - name: docker-credentials
+      secret:
+        secretName: push-secret
+  pipelineRef:
+    name: gohandler-pipeline

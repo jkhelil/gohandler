@@ -1,0 +1,80 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: gohandler-pipeline
+  annotations:
+    description: |
+      Build the artifacts for the Conference application's services
+spec:
+  params:
+    - name: gitRepository
+      description: The git repository that hosts the source code of the service
+      default: https://github.com/jkhelil/gohandler.git
+    - name: gitRevision
+      description: The git revision to build
+      default: main
+    - name: context
+      description: The path to the docker context in the sources workspace
+      default: "."
+    - name: target-registry
+      description: The target container registry and path where to build the image
+      default: docker.io/salaboy
+    - name: target-version
+      description: the target version to build
+      default: 1.0.0-gohandler-pipeline
+  workspaces:
+    - name: sources
+      description: Workspace where the git repo is prepared for building
+    - name: docker-credentials
+      description: Docker config secret
+  tasks:
+    - name: clone-repo
+      taskRef:
+        name: git-clone
+      params:
+        - name: url
+          value: $(params.gitRepository)
+        - name: revision
+          value: main
+      workspaces:
+        - name: output
+          workspace: sources
+    - name: build-publish
+      runAfter: [clone-repo]
+      workspaces:
+        - name: sources
+          workspace: sources
+        - name: dockerconfig
+          workspace: docker-credentials
+      params:
+        - name: target-version
+          value: $(params.target-version)
+        - name: context
+          value: $(params.context)
+        - name: target-registry
+          value: $(params.target-registry)
+      taskSpec:
+        params:
+          - name: context
+            description: The path to the docker context in the sources workspace
+            default: "."
+          - name: target-registry
+            description: The target container registry and path where to build the image
+            default: quay.io/jkhelil
+          - name: target-version
+            default: 1.0.0-gohandler-pipeline
+        workspaces:
+          - name: sources
+          - name: dockerconfig
+        steps:
+          - name: package
+            image: ghcr.io/ko-build/ko:latest
+            script: |
+              #!/bin/sh
+              #set -ex
+              export KO_DOCKER_REPO=$(params.target-registry)
+              mkdir ~/.docker
+              cp $(workspaces.dockerconfig.path)/.dockerconfigjson ~/.docker/config.json
+              cd $(workspaces.sources)
+              cd $(params.context)
+              ko build -t $(params.target-version) .
