@@ -9,7 +9,6 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
-	v1 "k8s.io/client-go/1.5/pkg/api/v1"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -26,9 +25,7 @@ func main() {
 	} else {
 		kubeclient = kubeclient
 	}
-	shareInformerFactory := informers.NewSharedInformerFactoryWithOptions(kubeclient, time.Minute*5, informers.WithTweakListOptions(func(options *v1.ListOptions) {
-		options.FieldSelector = fmt.Sprintf("spec.nodeName=%s", "kind-control-plane")
-	}))
+	shareInformerFactory := informers.NewSharedInformerFactoryWithOptions(kubeclient, time.Minute*5)
 	podInformer := shareInformerFactory.Core().V1().Pods().Informer()
 	podInformer.AddEventHandler(cache.ResourceEventHandlerFuncs{
 		AddFunc: func(obj interface{}) {
